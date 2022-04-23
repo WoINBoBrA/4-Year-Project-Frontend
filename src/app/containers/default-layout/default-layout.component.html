@@ -1,0 +1,64 @@
+<c-sidebar
+  #sidebar="cSidebar"
+  class="d-print-none sidebar sidebar-fixed"
+  id="sidebar"
+  visible
+  *ngIf="role==1"
+>
+  <c-sidebar-brand
+    routerLink="./"
+  >
+  </c-sidebar-brand>
+    <perfect-scrollbar [config]="perfectScrollbarConfig">
+  <c-sidebar-nav
+    [navItems]="navItems"
+  >
+  </c-sidebar-nav>
+    </perfect-scrollbar>
+  <c-sidebar-toggler
+    *ngIf="!sidebar.narrow"
+    toggle="unfoldable"
+    cSidebarToggle="sidebar"
+  ></c-sidebar-toggler>
+</c-sidebar>
+
+<div class="wrapper d-flex flex-column min-vh-100 bg-light dark:bg-transparent">
+  <app-default-header  (toggleModal)="ToggleModal()" class="mb-4 d-print-none header header-sticky" position="sticky" sidebarId="sidebar"></app-default-header>
+  <div class="body flex-grow-1 px-3">
+    <c-container breakpoint="lg" class="h-auto">
+      <router-outlet></router-outlet>
+    </c-container>
+  </div>
+</div>
+
+
+<c-modal [visible]="passwordChangeModal" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение пароля</h5>
+    <button (click)="ToggleModal()" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form (ngSubmit)="ChangePassword()" ngNativeValidate>
+
+      <c-row>
+        <label cLabel="col" cCol sm="4" xs="auto" for="oldPasswordForm">Старый пароль</label>
+        <c-col class="mb-3">
+          <input cFormControl id="oldPasswordForm" type="password" required placeholder="Пароль"
+            [(ngModel)]="oldPassword" name="oldPassword" />
+        </c-col>
+      </c-row>
+
+      <c-row>
+        <label cLabel="col" cCol sm="4" xs="auto" for="newPasswordForm">Новый пароль</label>
+        <c-col class="mb-3">
+          <input cFormControl id="newPasswordForm" type="password" required placeholder="Пароль"
+            [(ngModel)]="newPassword" name="newPassword" />
+        </c-col>
+      </c-row>
+
+      <c-row class="mx-1"><button cButton color="light" type="submit">Изменить</button></c-row>
+
+    </form>
+  </c-modal-body>
+</c-modal>
+

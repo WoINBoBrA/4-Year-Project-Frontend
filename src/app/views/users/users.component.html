@@ -1,0 +1,233 @@
+<c-card class="mb-4 mh-100">
+  <c-card-header>
+    <c-row>
+      <c-col class="fs-5" xs="auto" >
+        Пользователи
+      </c-col>
+      <c-col>
+        <button cButton (click)="LoadPage()" class="float-end" color="light"><svg cIcon name="cilReload"></svg></button>
+      </c-col>
+    </c-row>
+  </c-card-header>
+  <c-card-body>
+    <table [hover]="true" [responsive]="true" [small]="true" align="middle" cTable class="mb-0 border">
+      <thead>
+        <tr>
+          <th class="w-25" scope="col">Логин пользователя</th>
+          <th class="w-25" scope="col">Фамилия пользователя</th>
+          <th class="w-25" scope="col">Имя пользователя</th>
+          <th class="w-25" scope="col">Роль</th>
+          <th class="w-10" scope="col">Активен</th>
+          <th class="w-10" scope="col">Дата регистрации</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of tableData; index as i" [cTableColor]="row.isActive ? '' : 'dark'" [attr.index]="i"
+          (click)="SelectRow($event)" [cTableActive]="selectedRow == i">
+          <td>{{ row.login}}</td>
+          <td>{{ row.secondName}}</td>
+          <td>{{ row.firstName}}</td>
+          <td>{{ roles[row.role]}}</td>
+          <td><svg cIcon name="cilCheck" *ngIf="row.isActive"></svg></td>
+          <td>{{ row.createdAt | date:"dd.MM.YYYY"}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </c-card-body>
+  <c-card-footer>
+    <c-row>
+      <c-col sm="auto" xs="12">
+        <c-pagination size="sm">
+
+          <li cPageItem *ngFor="let button of buttons;" [disabled]="-1 == button" [active]="button == page">
+            <a cPageLink [routerLink]="['/users',button]">{{button == -1 ? "..." : button}}</a>
+          </li>
+        </c-pagination>
+      </c-col>
+      <c-col class="d-none d-md-block">
+        <button cButton (click)="ToggleModal(0)" color="light" class="float-end">
+          Создать пользователя
+        </button>
+
+        <button cButton (click)="ToggleModal(1)"
+          *ngIf="this.selectedRow != -1 && this.tableData[this.selectedRow].isActive" color="light"
+          class="me-3 float-end">
+          Деактивировать пользователя
+        </button>
+        <button cButton (click)="ToggleModal(2)"
+          *ngIf="this.selectedRow != -1 && !this.tableData[this.selectedRow].isActive" color="light"
+          class="me-3 float-end">
+          Активировать пользователя
+        </button>
+        <button cButton (click)="ToggleModal(3)" *ngIf="selectedRow != -1" color="light" class="me-3 float-end">
+          Изменить пароль
+        </button>
+        <button cButton (click)="ToggleModal(4)" *ngIf="selectedRow != -1" class="me-3 float-end" color="light">
+          Изменить ФИО
+        </button>
+
+      </c-col>
+    </c-row>
+  </c-card-footer>
+</c-card>
+
+<c-modal [visible]="modalVisible[0]" alignment="center">
+
+  <c-modal-header>
+    <h5 cModalTitle>Новый пользователь</h5>
+    <button (click)="ToggleModal(0)" cButtonClose></button>
+  </c-modal-header>
+
+  <c-modal-body>
+    <form (ngSubmit)="CreateUser()" cForm ngNativeValidate>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="loginForm">Логин</label>
+        <c-col>
+          <input cFormControl id="loginForm" type="text" placeholder="Логин" [(ngModel)]="userCreate.login"
+            name="userCreate.login" required />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="passwordForm">Пароль</label>
+        <c-col>
+          <input cFormControl id="passwordForm" type="password" placeholder="Пароль" [(ngModel)]="userCreate.password"
+            name="userCreate.password" required />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="firstNameForm">Имя</label>
+        <c-col>
+          <input cFormControl id="firstNameForm" type="text" placeholder="Имя" [(ngModel)]="userCreate.firstName"
+            name="userCreate.firstName" required />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="secondNameForm">Фамилия</label>
+        <c-col>
+          <input cFormControl id="secondNameForm" type="text" placeholder="Фамилия" [(ngModel)]="userCreate.secondName"
+            name="userCreate.secondName" required />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="passwordForm">Роль</label>
+        <c-col>
+          <select cSelect id="roleForm" [(ngModel)]="userCreate.role" name="userCreate.role" required>
+            <option></option>
+            <option value="1">{{roles[1]}}</option>
+            <option value="2">{{roles[2]}}</option>
+            <option value="3">{{roles[3]}}</option>
+          </select>
+        </c-col>
+      </c-row>
+
+      <c-row class="mx-1"><button cButton color="light" type="submit">Сохранить</button></c-row>
+
+    </form>
+  </c-modal-body>
+
+</c-modal>
+
+
+
+<c-modal [visible]="modalVisible[1]" alignment="center">
+
+  <c-modal-header>
+    <h5 cModalTitle>Деактивироть пользователя</h5>
+    <button (click)="ToggleModal(1)" cButtonClose></button>
+  </c-modal-header>
+
+  <c-modal-body>
+    Вы уверены?
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button (click)="ToggleModal(1)" cButton color="secondary">
+      Нет
+    </button>
+    <button (click)="DeactivateUser()" cButton color="light">Да</button>
+  </c-modal-footer>
+
+</c-modal>
+
+<c-modal [visible]="modalVisible[2]" alignment="center">
+
+  <c-modal-header>
+    <h5 cModalTitle>Активировать пользователя</h5>
+    <button (click)="ToggleModal(2)" cButtonClose></button>
+  </c-modal-header>
+
+  <c-modal-body>
+    Вы уверены?
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button (click)="ToggleModal(2)" cButton color="secondary">
+      Нет
+    </button>
+    <button (click)="ActivateUser()" cButton color="light">Да</button>
+  </c-modal-footer>
+
+</c-modal>
+
+<c-modal [visible]="modalVisible[3]" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение пароля</h5>
+    <button (click)="ToggleModal(3)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form (ngSubmit)="ChangePassword()" ngNativeValidate>
+
+      <c-row>
+        <label cLabel="col" cCol sm="2" xs="auto" for="newPasswordForm">Пароль</label>
+        <c-col class="mb-3">
+          <input cFormControl id="newPasswordForm" type="password" required placeholder="Пароль"
+            [(ngModel)]="_newPassword" name="_newPassword" />
+        </c-col>
+      </c-row>
+
+      <c-row class="mx-1"><button cButton color="light" type="submit">Сохранить</button></c-row>
+
+    </form>
+  </c-modal-body>
+
+</c-modal>
+
+
+
+
+
+
+<c-modal [visible]="modalVisible[4]" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение ФИО</h5>
+    <button (click)="ToggleModal(4)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form #newName="ngForm" (ngSubmit)="ChangeName()" [gutter]="3" cForm ngNativeValidate>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="firstNameForm">Имя</label>
+        <c-col>
+          <input cFormControl id="secondNameForm" type="text" placeholder="Фамилия" [(ngModel)]="secondName"
+            name="secondName" required />
+        </c-col>
+      </c-row>
+      <c-row class="mb-3">
+        <label cLabel="col" cCol sm="2" xs="auto" for="secondNameForm">Фамилия</label>
+        <c-col>
+          <input cFormControl id="firstNameForm" type="text" placeholder="Имя" [(ngModel)]="firstName" name="firstName"
+            required />
+        </c-col>
+      </c-row>
+
+
+      <c-row class="mx-1"><button cButton color="light" type="submit">Сохранить</button></c-row>
+
+    </form>
+  </c-modal-body>
+</c-modal>

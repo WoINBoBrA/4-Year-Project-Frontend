@@ -1,0 +1,205 @@
+<div *ngIf="role == 1">
+  <app-widgets-dropdown></app-widgets-dropdown>
+  <c-card class="mb-4">
+    <c-card-body>
+      <c-row>
+        <c-col sm="5">
+          <h4 class="card-title mb-0" id="traffic">
+            Трафик
+          </h4>
+          <div class="small text-medium-emphasis">2022 год</div>
+        </c-col>
+      </c-row>
+      <c-chart [data]="mainChart.data" [height]="300" [ngStyle]="{'marginTop.px': 40}" [options]="mainChart.options"
+        [type]="mainChart.type">
+        Main chart
+      </c-chart>
+    </c-card-body>
+  </c-card>
+</div>
+
+
+<div *ngIf="role == 2">
+  <c-card>
+    <c-card-header>
+      <c-row>
+        <c-col class="fs-5">
+          <select cSelect id="searchCondition" [(ngModel)]="condition" name="condition">
+            <option [value]="0">Мои задачи</option>
+            <option [value]="1">Задачи без исполнителя</option>
+          </select>
+        </c-col>
+        <c-col xs="auto">
+          <button cButton (click)="LoadPage()" class="float-end" color="light"><svg cIcon name="cilReload"></svg></button>
+        </c-col>
+      </c-row>
+    </c-card-header>
+    <c-card-body>
+      <c-col *ngIf="myTickets.length == 0" class="text-center">
+        <h1>У вас нет задач в работе</h1>
+      </c-col>
+      <table [hover]="true" [responsive]="true" [small]="true" align="middle" cTable class="mb-0 border"
+        *ngIf="myTickets.length != 0">
+        <thead>
+          <tr>
+            <th class="theme" scope="col">Тема заявки</th>
+            <th class="category" scope="col">Категория заявки</th>
+            <th class="applicant" scope="col">Заявитель</th>
+            <th class="worker" scope="col">Исполнитель</th>
+            <th class="state" scope="col">Статус заявки</th>
+            <th class="createDate" scope="col">Дата поступления заявки</th>
+            <th class="completeDate" scope="col">Дата выполнения заявки</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of myTickets; index as i" [cTableColor]="GetColor(ticket.states![0].state)"
+            [attr.index]="i" (click)="SelectRow($event)" [cTableActive]="selectedRow == i">
+            <td>{{ ticket.theme.length > 20 ? (ticket.theme | slice:0:20) + "..." : ticket.theme }}</td>
+            <td>{{ ticket.category!.name.length > 40 ? (ticket.category!.name | slice:0:40) + "..." :
+              ticket.category!.name }}</td>
+            <td>{{ ticket.applicant!.secondName}} {{ticket.applicant!.firstName}}</td>
+            <td>{{ ticket.worker != undefined ? ticket.worker.secondName : ""}} {{ ticket.worker != undefined ?
+              ticket.worker.firstName : ""}}</td>
+            <td>{{ StateToName(ticket.states![0].state)}}</td>
+            <td>{{ ticket.createdAt | date:"dd.MM.YYYY"}}</td>
+            <td>{{ CheckState(ticket.states![0].state) ? (ticket.states![0].createdAt | date:"dd.MM.YYYY") : ""}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </c-card-body>
+    <c-card-footer>
+      <c-row>
+        <c-col sm="5">
+          <c-pagination size="sm">
+            <li cPageItem *ngFor="let button of buttons;" [disabled]="-1 == button" [active]="button == page">
+              <a cPageLink [routerLink]="['/tickets',button]">{{button == -1 ? "..." : button}}</a>
+            </li>
+          </c-pagination>
+        </c-col>
+        <c-col class="d-none d-md-block" sm="7">
+          <button cButton [routerLink]="['/ticket',myTickets[selectedRow].id]" *ngIf="selectedRow != -1"
+            class="float-end me-3" color="light">
+            Просмотреть заявку
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-footer>
+  </c-card>
+</div>
+
+
+
+
+
+<div *ngIf="role == 3">
+  <c-card>
+
+
+    <c-card-header>
+      <c-row>
+        <c-col class="fs-5" xs="auto">
+          Мои заявки
+        </c-col>
+        <c-col>
+          <button cButton (click)="LoadPage()" class="float-end" color="light"><svg cIcon name="cilReload"></svg></button>
+        </c-col>
+      </c-row>
+    </c-card-header>
+    <c-card-body>
+      <c-col *ngIf="myTickets.length == 0" class="text-center">
+        <h1>У вас нет заявок</h1>
+      </c-col>
+      <table [hover]="true" [responsive]="true" [small]="true" align="middle" cTable class="mb-0 border"
+        *ngIf="myTickets.length != 0">
+        <thead>
+          <tr>
+            <th class="theme" scope="col">Тема заявки</th>
+            <th class="category" scope="col">Категория заявки</th>
+            <th class="applicant" scope="col">Заявитель</th>
+            <th class="worker" scope="col">Исполнитель</th>
+            <th class="state" scope="col">Статус заявки</th>
+            <th class="createDate" scope="col">Дата поступления заявки</th>
+            <th class="completeDate" scope="col">Дата выполнения заявки</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of myTickets; index as i" [cTableColor]="GetColor(ticket.states![0].state)"
+            [attr.index]="i" (click)="SelectRow($event)" [cTableActive]="selectedRow == i">
+            <td>{{ ticket.theme.length > 20 ? (ticket.theme | slice:0:20) + "..." : ticket.theme }}</td>
+            <td>{{ ticket.category!.name.length > 40 ? (ticket.category!.name | slice:0:40) + "..." :
+              ticket.category!.name }}</td>
+            <td>{{ ticket.applicant!.secondName}} {{ticket.applicant!.firstName}}</td>
+            <td>{{ ticket.worker != undefined ? ticket.worker.secondName : ""}} {{ ticket.worker != undefined ?
+              ticket.worker.firstName : ""}}</td>
+            <td>{{ StateToName(ticket.states![0].state)}}</td>
+            <td>{{ ticket.createdAt | date:"dd.MM.YYYY"}}</td>
+            <td>{{ CheckState(ticket.states![0].state) ? (ticket.states![0].createdAt | date:"dd.MM.YYYY") : ""}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </c-card-body>
+    <c-card-footer>
+      <c-row>
+        <c-col sm="5">
+          <c-pagination size="sm">
+            <li cPageItem *ngFor="let button of buttons;" [disabled]="-1 == button" [active]="button == page">
+              <a cPageLink [routerLink]="['/tickets',button]">{{button == -1 ? "..." : button}}</a>
+            </li>
+          </c-pagination>
+        </c-col>
+        <c-col class="d-none d-md-block" sm="7">
+          <button cButton (click)="ToggleModal(0)" class="float-end" color="light">
+            Создать заявку
+          </button>
+
+          <button cButton [routerLink]="['/ticket',myTickets[selectedRow].id]" *ngIf="selectedRow != -1"
+            class="float-end me-3" color="light">
+            Просмотреть заявку
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-footer>
+  </c-card>
+</div>
+
+
+<c-modal [visible]="modal[0]" size="lg" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Новая заявка</h5>
+    <button (click)="ToggleModal(0)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form cForm ngNativeValidate (ngSubmit)="CreateTicket()">
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="newTicketCategory">Категория</label>
+        <c-col>
+          <select cSelect id="newTicketCategory" name="newTicket.category" [(ngModel)]="newTicket.category" required>
+            <option *ngFor="let option of categoryOptions" [value]="option.id">{{option.name}}</option>
+          </select>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="newTicketTheme">Тема</label>
+        <c-col>
+          <input cFormControl id="newTicketTheme" type="text" placeholder="Тема" [(ngModel)]="newTicket.theme"
+            name="newTicket.theme" required />
+        </c-col>
+      </c-row>
+
+      <c-row>
+        <label cLabel for="newTicketText">Текст сообщения</label>
+      </c-row>
+      <c-row class="mb-3 mx-1">
+        <textarea cFormControl id="newTicketText" rows="3" name="newTicket.text" [(ngModel)]="newTicket.text"
+          required></textarea>
+      </c-row>
+
+      <c-row class="mx-1">
+        <button type="submit" cButton color="light">Создать</button>
+      </c-row>
+
+    </form>
+  </c-modal-body>
+</c-modal>

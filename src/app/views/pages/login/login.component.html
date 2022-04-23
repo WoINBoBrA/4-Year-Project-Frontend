@@ -1,0 +1,46 @@
+<div class="bg-light min-vh-100 d-flex flex-row align-items-center">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="8">
+          <c-card class="p-4">
+            <c-card-body>
+              <form (ngSubmit)="Login()" cForm ngNativeValidate>
+
+                <h1>Войти</h1>
+                <p class="text-medium-emphasis">Вход в учётную запись</p>
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilUser"></svg>
+                  </span>
+                  <input autoComplete="username" cFormControl placeholder="Логин" [(ngModel)]="form.username" name="form.username" required />
+                </c-input-group>
+                <c-input-group class="mb-4">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilLockLocked"></svg>
+                  </span>
+                  <input
+                    autoComplete="current-password"
+                    cFormControl
+                    placeholder="Пароль"
+                    type="password"
+                    [(ngModel)]="form.password"
+                    name="form.password"
+                    required
+                  />
+                </c-input-group>
+                <c-row>
+                  <c-col xs="6">
+                    <button cButton type="submit" class="px-4" color="primary">
+                      Войти
+                    </button>
+                  </c-col>
+                  <c-col class="text-right" xs="6">
+                  </c-col>
+                </c-row>
+              </form>
+            </c-card-body>
+          </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

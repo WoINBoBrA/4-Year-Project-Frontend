@@ -1,0 +1,87 @@
+<c-card class="mb-4 mh-100">
+  <c-card-header>
+    <c-row>
+      <c-col class="fs-5" xs="9">
+        Категории
+      </c-col>
+      <c-col xs="3">
+        <button cButton (click)="LoadPage()" class="float-end" color="light"><svg cIcon name="cilReload"></svg></button>
+      </c-col>
+    </c-row>
+  </c-card-header>
+  <c-card-body>
+    <table [hover]="true" [responsive]="true" [small]="true" align="middle" cTable class="mb-0 border">
+      <thead>
+        <tr>
+          <th scope="col">ИД Категории</th>
+          <th style="width:90%" scope="col">Название категории</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of tableData; index as i" [attr.index]="i" (click)="SelectRow($event)"
+          [cTableActive]="selectedRow == i">
+          <td>{{ row.id}}</td>
+          <td>{{ row.name}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </c-card-body>
+  <c-card-footer>
+    <c-row>
+      <c-col sm="auto">
+        <c-pagination size="sm">
+          <li cPageItem *ngFor="let button of buttons;" [disabled]="-1 == button" [active]="button == page">
+            <a cPageLink [routerLink]="['/categories',button]">{{button == -1 ? "..." : button}}</a>
+          </li>
+        </c-pagination>
+      </c-col>
+      <c-col class="d-none d-md-block">
+        <button cButton (click)="ToggleModal(0)" color="light" class="float-end">
+          Создать категорию
+        </button>
+        <button cButton (click)="ToggleModal(1)" *ngIf="selectedRow != -1" class="me-3 float-end" color="light">
+          Изменить название категории
+        </button>
+
+      </c-col>
+    </c-row>
+  </c-card-footer>
+</c-card>
+
+<c-modal [visible]="modalVisible[0]" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Новая категория</h5>
+    <button (click)="ToggleModal(0)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form (ngSubmit)="CreateCategory()" cForm ngNativeValidate>
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="newCategoryName">Название</label>
+        <c-col>
+          <input cFormControl id="newCategoryName" type="text" placeholder="Название" [(ngModel)]="newCategory.name"
+            name="newCategory.name" required />
+        </c-col>
+      </c-row>
+      <c-row class="mx-1"><button cButton color="light" type="submit">Сохранить</button></c-row>
+    </form>
+  </c-modal-body>
+</c-modal>
+
+<c-modal [visible]="modalVisible[1]" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение названия категории</h5>
+    <button (click)="ToggleModal(1)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form (ngSubmit)="ChangeName()" cForm ngNativeValidate>
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="categoryName">Название</label>
+        <c-col>
+          <input cFormControl id="categoryName" type="text" placeholder="Название" [(ngModel)]="newCategory.name"
+            name="newCategory.name" required />
+        </c-col>
+      </c-row>
+      <c-row class="mx-1"><button cButton color="light" type="submit">Сохранить</button></c-row>
+    </form>
+  </c-modal-body>
+</c-modal>

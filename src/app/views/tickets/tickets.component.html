@@ -1,0 +1,93 @@
+<c-card class="mb-4 mh-100">
+  <c-card-header>
+    <form cForm (ngSubmit)="ChangeSearchCondition()" class="mt-3" ngNativeValidate>
+      <c-row class="mb-2">
+        <label cLabel="col" cCol sm="auto" for="searchCondition">Заявки</label>
+        <c-col>
+          <select cSelect id="searchCondition" [(ngModel)] = "condition.selected" name="condition.selected">
+            <option *ngFor="let option of searchConditions;index as i" [value]="i">{{option}}</option>
+          </select>
+        </c-col>
+        <c-col xs="auto">
+          <button cButton class="float-end" color="light" type="submit">Найти</button>
+        </c-col>
+      </c-row>
+      <c-row *ngIf="condition.selected == 1" class="mb-2">
+        <label cLabel="col" cCol sm="auto" for="applicant">Заявитель:</label>
+        <c-col>
+          <select size="sm" cSelect id="applicant" [(ngModel)] = "selected.applicant" name="selected.applicant" required>
+            <option *ngFor="let option of applicants" [value]="option.id">{{option.secondName}} {{option.firstName}}</option>
+          </select>
+        </c-col>
+      </c-row>
+      <c-row *ngIf="condition.selected == 2" class="mb-2">
+        <label cLabel="col" cCol sm="auto" for="worker">Исполнитель:</label>
+        <c-col>
+          <select size="sm" cSelect id="worker" [(ngModel)] = "selected.worker" name="selected.worker">
+            <option></option>
+            <option *ngFor="let option of workers" [value]="option.id">{{option.secondName}} {{option.firstName}}</option>
+          </select>
+        </c-col>
+      </c-row>
+      <c-row *ngIf="condition.selected == 1 || condition.selected == 2 || condition.selected == 3" class="mb-2">
+        <label cLabel="col" cCol sm="auto" for="state">Состояние:</label>
+        <c-col>
+          <select size="sm" cSelect id="state" [(ngModel)] = "selected.state" name="selected.state" required>
+            <option *ngFor="let option of ticketStates" [value]="option.id">{{option.name}}</option>
+          </select>
+        </c-col>
+      </c-row>
+    </form>
+  </c-card-header>
+  <c-card-body>
+    <c-col *ngIf="tableData.length == 0" class="text-center"> <h1>Записей нет</h1> </c-col>
+    <table 
+      [hover]="true"
+      [responsive]="true"
+      [small]="true"
+      align="middle"
+      cTable
+      class="mb-0 border"
+      *ngIf="tableData.length != 0"
+      >
+      <thead>
+        <tr>
+          <th class = "theme"scope="col">Тема заявки</th>
+          <th class = "category"scope="col">Категория заявки</th>
+          <th class = "applicant"scope="col">Заявитель</th>
+          <th class = "worker" scope="col">Исполнитель</th>
+          <th class = "state" scope="col">Статус заявки</th>
+          <th class = "createDate" scope="col">Дата поступления заявки</th>
+          <th class = "completeDate" scope="col">Дата выполнения заявки</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr  *ngFor="let ticket of tableData; index as i" [cTableColor]="GetColor(ticket.states![0].state)" [attr.index]="i" (click) ="SelectRow($event)" [cTableActive]="selectedRow == i">
+          <td>{{ ticket.theme.length > 20 ? (ticket.theme | slice:0:20) + "..." : ticket.theme }}</td>
+          <td>{{ ticket.category!.name.length > 40 ? (ticket.category!.name | slice:0:40) + "..." : ticket.category!.name }}</td>
+          <td>{{ ticket.applicant!.secondName}} {{ticket.applicant!.firstName}}</td>
+          <td>{{ ticket.worker != undefined ? ticket.worker.secondName : ""}} {{ ticket.worker != undefined ? ticket.worker.firstName : ""}}</td>
+          <td>{{ StateToName(ticket.states![0].state)}}</td>
+          <td>{{ ticket.createdAt | date:"dd.MM.YYYY"}}</td>
+          <td>{{ CheckState(ticket.states![0].state) ? (ticket.states![0].createdAt | date:"dd.MM.YYYY") : ""}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </c-card-body>
+  <c-card-footer>
+    <c-row>
+      <c-col sm="5">
+      <c-pagination size="sm">
+        <li cPageItem *ngFor="let button of buttons;" [disabled]="-1 == button" [active]="button == page">
+          <a cPageLink [routerLink]="['/tickets',button]">{{button == -1 ? "..." : button}}</a>
+        </li>
+      </c-pagination>
+      </c-col>
+      <c-col class="d-none d-md-block" sm="7">
+        <button cButton [routerLink]="['/ticket',tableData[selectedRow].id]" *ngIf="selectedRow != -1" class="float-end" color="light">
+          Просмотреть заявку
+        </button>
+      </c-col>
+    </c-row>
+  </c-card-footer>
+</c-card>

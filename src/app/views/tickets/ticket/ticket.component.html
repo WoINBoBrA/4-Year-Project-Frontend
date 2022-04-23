@@ -1,0 +1,253 @@
+<c-card class="mb-4">
+  <c-card-header>Заявка №{{ticket.id}}</c-card-header>
+  <c-card-body>
+    <form cForm>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="theme">Тема заявки</label>
+        <c-col>
+          <input cFormControl id="theme" [value]="ticket.theme" readonly>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="category">Категория заявки</label>
+        <c-col>
+          <input cFormControl id="category" [value]="ticket.category?.name" readonly>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="state">Статус заявки</label>
+        <c-col>
+          <input cFormControl id="state" [value]="GetStateName()" readonly>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="applicant">Заявитель</label>
+        <c-col>
+          <input cFormControl id="applicant" [value]="ticket.applicant?.secondName + ' ' + ticket.applicant?.firstName"
+            readonly>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel="col" cCol xs="2" for="worker">Исполнитель</label>
+        <c-col>
+          <input cFormControl id="worker"
+            [value]="ticket.worker != null ? ticket.worker?.secondName + ' ' + ticket.worker?.firstName : ''" readonly>
+        </c-col>
+      </c-row>
+
+      <c-card>
+        <c-card-header>
+          Сообщения
+        </c-card-header>
+        <c-card-body class="messages">
+          <c-row class="mb-3" *ngFor="let message of ticket.messages">
+            <div *ngIf="message.userId == ticket.applicantId; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+              <c-col sm="5">
+                <c-card class="float-start text-start ps-2">
+                  <c-card-body>
+                    <h6 cCardTitle class="mb-3">{{message.user?.secondName}} {{message.user?.firstName}}</h6>
+                    <p cCardText>
+                      {{message.text}}
+                    </p>
+                    <p cCardText>
+                      <small>{{message.createdAt | date:"dd.MM.YYYY HH:mm"}}</small>
+                    </p>
+                  </c-card-body>
+                </c-card>
+              </c-col>
+              <c-col sm="7"></c-col>
+            </ng-template>
+            <ng-template #elseBlock>
+              <c-col sm="7"></c-col>
+              <c-col sm="5">
+                <c-card class="float-end text-end pe-2" [color]="'dark'" [textColor]="'white'">
+                  <c-card-body>
+                    <h6 cCardTitle class="mb-3">{{message.user?.secondName}} {{message.user?.firstName}}</h6>
+                    <p cCardText>
+                      {{message.text}}
+                    </p>
+                    <p cCardText>
+                      <small>{{message.createdAt | date:"dd.MM.YYYY HH:mm"}}</small>
+                    </p>
+                  </c-card-body>
+                </c-card>
+              </c-col>
+            </ng-template>
+          </c-row>
+        </c-card-body>
+      </c-card>
+    </form>
+  </c-card-body>
+  <c-card-footer>
+    <c-row>
+      
+      <c-col>
+        <button cButton (click)="ToggleModal(2)" *ngIf="ticket.states![0].state != 4 && ticket.states![0].state != 3 && !(user.role == 2 && ticket.workerId != user.userId) && !(user.role == 3 && ticket.applicantId != user.userId)"
+        color="light" class="me-3">
+          Добавить сообщение
+        </button>
+        <span *ngIf="user.role == 1">
+          <button cButton (click)="ToggleModal(0)" *ngIf="ticket.states![0].state != 4 && ticket.states![0].state != 3"
+            color="light" class="me-3">
+            Изменить статус заявки
+          </button>
+          <button cButton (click)="ToggleModal(1)" *ngIf="ticket.states![0].state != 4 && ticket.states![0].state != 3"
+            color="light" class="me-3">
+            Изменить категорию
+          </button>
+
+          <button cButton (click)="ToggleModal(3)" *ngIf="ticket.states![0].state != 4 && ticket.states![0].state != 3"
+            color="light" class="me-3">
+            Изменить исполнителя
+          </button>
+        </span>
+        <span *ngIf="user.role == 2">
+          <button cButton (click)="ConfirmModal(3)" *ngIf="ticket.states![0].state == 1 && ticket.workerId == user.userId"
+          color="light" class="me-3">
+            Отправить на подтверждение
+          </button>
+          <button cButton (click)="ConfirmModal(4)" *ngIf="ticket.states![0].state == 1 && ticket.workerId != user.userId"
+          color="light" class="me-3">
+            Взять в работу
+          </button>
+        </span>
+        <span *ngIf="user.role == 3">
+          <button cButton (click)="ConfirmModal(0)" *ngIf="ticket.states![0].state == 1 || ticket.states![0].state == 2"
+          color="light" class="me-3">
+            Отменить заявку
+          </button>
+          <button cButton (click)="ConfirmModal(1)" *ngIf="ticket.states![0].state == 2"
+          color="light" class="me-3">
+            Подтвердить выполнение
+          </button>
+          <button cButton (click)="ConfirmModal(2)" *ngIf="ticket.states![0].state == 2"
+          color="light" class="me-3">
+            Отклонить выполнение
+          </button>
+        </span>
+        <button cButton color="light" class="float-end" routerLink="/tickets">
+          Назад
+        </button>
+      </c-col>
+    </c-row>
+  </c-card-footer>
+</c-card>
+
+
+<c-modal *ngIf="user.role == 1" [visible]="modal[0]" size="lg" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение статуса заявки</h5>
+    <button (click)="ToggleModal(0)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form cForm ngNativeValidate (ngSubmit)="ChangeState()">
+      <c-row>
+        <label cLabel="col" cCol xs="2" for="statusChange">Статус заявки</label>
+        <c-col>
+          <select cSelect class="mb-3" id="statusChange" name="selected.state" [(ngModel)]="selected.state" required>
+            <option value="0">Закрыта</option>
+            <option value="1">В работе</option>
+            <option value="2">Ожидает ответа</option>
+          </select>
+        </c-col>
+      </c-row>
+      <c-row class="mx-1">
+        <button type="submit" cButton color="light">Сохранить</button>
+      </c-row>
+    </form>
+  </c-modal-body>
+</c-modal>
+
+<c-modal *ngIf="user.role == 1" [visible]="modal[1]" size="lg" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение категории заявки</h5>
+    <button (click)="ToggleModal(1)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form cForm ngNativeValidate (ngSubmit)="ChangeCategory()">
+
+      <c-row>
+        <label cLabel="col" cCol xs="2" for="categoryChange">Категория</label>
+        <c-col>
+          <select cSelect class="mb-3" id="categoryChange" name="selected.category" [(ngModel)]="selected.category"
+            required>
+            <option *ngFor="let option of categoryOptions" [value]="option.id">{{option.name}}</option>
+          </select>
+        </c-col>
+      </c-row>
+      <c-row class="mx-1">
+        <button type="submit" cButton color="light">Сохранить</button>
+      </c-row>
+    </form>
+  </c-modal-body>
+</c-modal>
+
+<c-modal [visible]="modal[2]" size="lg" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Новое сообщение</h5>
+    <button (click)="ToggleModal(2)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form cForm ngNativeValidate (ngSubmit)="AddMessage()">
+      <c-row>
+        <label cLabel="col" cCol for="newMessageText">Текст сообщения</label>
+      </c-row>
+      <c-row class="mb-3 mx-1">
+        <textarea cFormControl id="newMessageText" rows="3" name="newMessageContent" [(ngModel)]="newMessageContent"
+          required></textarea>
+      </c-row>
+      <c-row class="mx-1">
+        <button type="submit" cButton color="light">Создать</button>
+      </c-row>
+    </form>
+  </c-modal-body>
+</c-modal>
+
+<c-modal *ngIf="user.role == 1" [visible]="modal[3]" size="lg" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Изменение исполнителя</h5>
+    <button (click)="ToggleModal(3)" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form cForm ngNativeValidate (ngSubmit)="ChangeWorker()">
+      <c-row>
+        <label cLabel="col" cCol xs="2" for="workerChange">Исполнитель</label>
+        <c-col>
+          <select cSelect class="mb-3" id="workerChange" name="selected.worker" [(ngModel)]="selected.worker" required>
+            <option [value]="null"></option>
+            <option *ngFor="let option of workerOptions" [value]="option.id">{{option.secondName}} {{option.firstName}}
+            </option>
+          </select>
+        </c-col>
+      </c-row>
+      <c-row class="mx-1"><button type="submit" cButton color="light">Сохранить</button></c-row>
+    </form>
+  </c-modal-body>
+</c-modal>
+
+<c-modal [visible]="modal[4]" alignment="center">
+
+  <c-modal-header>
+    <h5 cModalTitle>{{confirm.name}}</h5>
+    <button (click)="ToggleModal(4)" cButtonClose></button>
+  </c-modal-header>
+
+  <c-modal-body>
+    Отмена действия будет невозможна.
+    Вы уверены? 
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button (click)="ToggleModal(4)" cButton color="secondary">
+      Нет
+    </button>
+    <button (click)="confirm.method()" cButton color="light">Да</button>
+  </c-modal-footer>
+
+</c-modal>
